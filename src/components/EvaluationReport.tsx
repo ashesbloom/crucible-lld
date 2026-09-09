@@ -15,7 +15,7 @@ const LEVEL_VALUE: Record<LevelId, number> = { L0: 0, L1: 1, L2: 2, L3: 3 };
 
 const SOURCE_LABEL: Record<EvaluationSource, string> = {
   DETERMINISTIC: "counted",
-  LLM: "judged by Claude",
+  LLM: "judged by a model",
   HEURISTIC: "heuristic, no API key",
 };
 

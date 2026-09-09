@@ -15,6 +15,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { LlmClient, StructuredRequest } from "@/domain/ports/index";
+import { GeminiLlmClient } from "@/infrastructure/llm/GeminiLlmClient";
 
 const MODEL = "claude-sonnet-5";
 
@@ -69,7 +70,16 @@ export class UnavailableLlmClient implements LlmClient {
   }
 }
 
+/**
+ * First provider with a key wins, and none is a normal state rather than an
+ * error: the heuristic evaluator covers the judged criteria and the whole loop
+ * still runs end to end.
+ *
+ * Anthropic is tried first only because it is the one the rubric prompts were
+ * written against. Nothing downstream can tell the difference, which is the
+ * property the `LlmClient` port exists to hold.
+ */
 export function createLlmClient(): LlmClient {
-  const client = new AnthropicLlmClient();
-  return client.available ? client : new UnavailableLlmClient();
+  const candidates: LlmClient[] = [new AnthropicLlmClient(), new GeminiLlmClient()];
+  return candidates.find((client) => client.available) ?? new UnavailableLlmClient();
 }

@@ -359,7 +359,7 @@ function Result({ attemptId, document, requirement, answeredEvaluationId, answer
 
         {findings.filter((f) => f.source === "LLM").length > 0 && (
           <div className="panel" style={{ padding: "0.9rem 1rem", borderColor: "var(--added)" }}>
-            <h2 style={{ fontSize: "var(--t-h4)" }}>Claude disagrees with some of your tagging</h2>
+            <h2 style={{ fontSize: "var(--t-h4)" }}>The model disagrees with some of your tagging</h2>
             <p className="small faint" style={{ margin: "0.2rem 0 0.7rem" }}>
               Its only job this round: check claims that something needs no change.
             </p>

@@ -19,14 +19,16 @@ npm run dev
 
 Open <http://localhost:3000> and click **Take the tour**. That seeds three completed attempts and walks the whole loop in five screens.
 
-**No API key is needed.** Without one, the judged criteria fall back to a heuristic evaluator that derives levels from measurable properties of your submission, so the loop works end to end and a bad design still scores badly. To use Claude for the judged criteria:
+**No API key is needed.** Without one, the judged criteria fall back to a heuristic evaluator that derives levels from measurable properties of your submission, so the loop works end to end and a bad design still scores badly. To have a model judge them instead, set either key and the first one present is used:
 
 ```bash
-cp .env.example .env.local   # then set ANTHROPIC_API_KEY
+cp .env.example .env.local   # then set ANTHROPIC_API_KEY or GEMINI_API_KEY
 ```
 
+Two adapters, one `LlmClient` port. Adding the second provider was a new file and one line in the composition root, and no evaluator, rubric, pipeline stage or component changed. That is the extensibility claim being checked rather than described.
+
 ```bash
-npm test        # 104 tests, no network, no API key needed
+npm test        # 109 tests, no network, no API key needed
 npm run build   # production build
 npm run typecheck
 ```
@@ -108,4 +110,4 @@ Honest list, in the order I would fix them.
 
 ## Deploying
 
-The repositories talk to libSQL, which serves a local file and hosted SQLite through one client. Point `DATABASE_URL` at a `libsql://` URL and set `DATABASE_AUTH_TOKEN`, and the same code runs on a platform with a read-only filesystem. Set `ANTHROPIC_API_KEY` to enable the judged criteria.
+The repositories talk to libSQL, which serves a local file and hosted SQLite through one client. Point `DATABASE_URL` at a `libsql://` URL and set `DATABASE_AUTH_TOKEN`, and the same code runs on a platform with a read-only filesystem. Set `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` to enable the judged criteria; `GEMINI_MODEL` overrides the default model name if it is ever retired.
