@@ -1,0 +1,36 @@
+{
+  "name": "crucible",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LLD practice platform that stress-tests your design instead of grading it.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.65.0",
+    "@gsap/react": "^2.1.2",
+    "@libsql/client": "^0.15.15",
+    "gsap": "^3.15.0",
+    "marked": "^18.0.12",
+    "mermaid": "^11.12.0",
+    "next": "^15.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "jsdom": "^30.0.1",
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

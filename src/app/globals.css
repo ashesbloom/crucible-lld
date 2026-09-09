@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Crucible
+
+   Plain page. White, one text colour, one border colour, no radius, no
+   shadows, no gradients, system fonts. The only colour in the whole stylesheet
+   is the impact triad, because that colour carries meaning: unchanged /
+   modified / added / too-wide mean the same thing on the diagram, in the
+   report and on the history chart. Everything else is black on white.
+
+   The token *names* are the dark-theme ones. They are kept so the ~15 files
+   that reference them keep working; only the values changed.
+   ========================================================================= */
+
+:root {
+  /* Ground and rules */
+  --ink-900: #fff;   /* page */
+  --ink-800: #fff;   /* panel */
+  --ink-700: #eee;   /* hairline */
+  --ink-600: #ddd;   /* border */
+  --ink-500: #ccc;   /* border, stronger */
+
+  /* Same thing, kept for the diagram panels */
+  --vellum:     #fff;
+  --vellum-2:   #fafafa;
+  --vellum-3:   #ddd;
+  --vellum-ink: #111;
+
+  /* Text */
+  --chalk:       #111;
+  --chalk-dim:   #555;
+  --chalk-faint: #888;
+
+  /* The status palette. Re-picked for a white ground: all four clear 4.5:1
+     against #fff, so unlike the dark theme they are legal on small text too.
+     They are still never the only carrier of meaning — every place one appears,
+     the state is written next to it. */
+  --contained: #1a7f5a;  /* untouched by the change */
+  --modified:  #8a6100;  /* had to be edited */
+  --added:     #3b4fc4;  /* newly written */
+  --wide:      #b3261e;  /* the change spread too far */
+
+  --accent-text: #1a7f5a;
+
+  --contained-dim: color-mix(in oklab, var(--contained) 10%, #fff);
+  --modified-dim:  color-mix(in oklab, var(--modified) 10%, #fff);
+  --added-dim:     color-mix(in oklab, var(--added) 10%, #fff);
+  --wide-dim:      color-mix(in oklab, var(--wide) 10%, #fff);
+
+  /* Small range on purpose. A heading is a heading because it is bold, not
+     because it is huge. */
+  --t-micro:  0.75rem;
+  --t-small:  0.85rem;
+  --t-body:   0.95rem;
+  --t-lead:   1rem;
+  --t-h4:     1rem;
+  --t-h3:     1.1rem;
+  --t-h2:     1.25rem;
+  --t-h1:     1.5rem;
+  --t-display:2rem;
+  --t-hero:   1.6rem;
+
+  --measure: 70ch;
+  --radius: 0;
+  --shell: 1080px;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ink-900);
+  color: var(--chalk);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--t-body);
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+}
+
+p { margin: 0 0 1em; }
+a { color: inherit; }
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--contained);
+  outline-offset: 2px;
+}
+
+/* --- Shell ---------------------------------------------------------------- */
+
+.shell { width: min(100% - 2rem, var(--shell)); margin-inline: auto; }
+.shell-narrow { width: min(100% - 2rem, 720px); margin-inline: auto; }
+
+.stack > * + * { margin-top: var(--gap, 1rem); }
+
+/* --- Identifiers ---------------------------------------------------------- */
+/* Monospace is reserved for things that are literally identifiers in the
+   learner's design: class names, ids, measurements. Never for generic labels. */
+
+.ident  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; }
+.metric { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+/* --- Boxes ---------------------------------------------------------------- */
+
+.vellum      { background: #fff; color: var(--chalk); border: 1px solid var(--ink-600); }
+.panel       { background: #fff; border: 1px solid var(--ink-600); }
+.panel-quiet { background: #fff; border: 1px solid var(--ink-700); }
+
+/* --- Buttons -------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--chalk);
+  background: #fff;
+  color: var(--chalk);
+  font: inherit;
+  font-size: var(--t-small);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover { background: #f2f2f2; }
+.btn-primary { background: var(--chalk); color: #fff; }
+.btn-primary:hover { background: #333; }
+.btn-ghost { border-color: var(--ink-600); }
+.btn-quiet { border: none; padding: 0; text-decoration: underline; color: var(--chalk-dim); }
+.btn-quiet:hover { background: none; color: var(--chalk); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* --- Impact language ------------------------------------------------------ */
+
+.impact-unchanged { --impact: var(--contained); --impact-dim: var(--contained-dim); }
+.impact-modified  { --impact: var(--modified);  --impact-dim: var(--modified-dim); }
+.impact-new       { --impact: var(--added);     --impact-dim: var(--added-dim); }
+.impact-wide      { --impact: var(--wide);      --impact-dim: var(--wide-dim); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  font-size: var(--t-micro);
+  background: var(--impact-dim, #fff);
+  color: var(--impact, var(--chalk-dim));
+  border: 1px solid color-mix(in oklab, var(--impact, var(--ink-600)) 45%, #fff);
+}
+
+/* --- Level bar ------------------------------------------------------------ */
+/* Four ordinal steps, drawn as four steps. A continuous bar would imply a
+   precision the rubric deliberately does not claim. */
+
+.levels { display: flex; gap: 2px; }
+.level-step { height: 5px; flex: 1; background: var(--ink-600); }
+.level-step[data-on="true"] { background: var(--level-color, var(--contained)); }
+
+/* --- Forms ---------------------------------------------------------------- */
+
+.field {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--ink-600);
+  color: var(--chalk);
+  font: inherit;
+  font-size: var(--t-small);
+  padding: 0.35rem 0.5rem;
+}
+.field::placeholder { color: var(--chalk-faint); }
+.field:focus { border-color: var(--chalk); outline: none; }
+
+textarea.field { resize: vertical; line-height: 1.5; }
+select.field { cursor: pointer; }
+
+/* --- Prose (research / design / AI usage notes) --------------------------- */
+
+.prose { max-width: var(--measure); line-height: 1.65; }
+.prose h1 { font-size: var(--t-h1); margin: 0 0 0.7em; }
+.prose h2 { font-size: var(--t-h2); margin: 2em 0 0.5em; padding-top: 1em; border-top: 1px solid var(--ink-600); }
+.prose h3 { font-size: var(--t-h4); margin: 1.6em 0 0.4em; }
+.prose h2:first-of-type { border-top: none; padding-top: 0; }
+.prose a { text-underline-offset: 3px; }
+.prose ul, .prose ol { padding-left: 1.15em; margin: 0 0 1.2em; }
+.prose li { margin-bottom: 0.35em; }
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86em;
+  background: #f4f4f4;
+  padding: 0.1em 0.3em;
+}
+.prose pre {
+  background: #fafafa;
+  border: 1px solid var(--ink-600);
+  padding: 0.8rem 0.9rem;
+  overflow-x: auto;
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+.prose pre code { background: none; padding: 0; }
+.prose blockquote {
+  margin: 1.3em 0;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 2px solid var(--ink-600);
+  color: var(--chalk-dim);
+}
+.prose table { width: 100%; border-collapse: collapse; font-size: var(--t-small); margin: 1.3em 0; }
+.prose th, .prose td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--ink-600); vertical-align: top; }
+.prose th { font-weight: 600; }
+.prose hr { border: none; border-top: 1px solid var(--ink-600); margin: 2.2em 0; }
+
+.prose-scroll { overflow-x: auto; }
+
+/* --- Mermaid -------------------------------------------------------------- */
+
+.diagram { display: flex; justify-content: center; padding: 1rem; }
+.diagram svg { max-width: 100%; height: auto; }
+
+/* Impact colouring on diagram nodes. Mermaid emits our cssClass names onto the
+   node group, so the meaning of a colour stays identical to everywhere else. */
+.diagram .unchanged > rect, .diagram g.unchanged rect { fill: color-mix(in oklab, var(--contained) 12%, #fff) !important; stroke: var(--contained) !important; }
+.diagram .modified  > rect, .diagram g.modified rect  { fill: color-mix(in oklab, var(--modified) 14%, #fff) !important; stroke: var(--modified) !important; }
+.diagram .new       > rect, .diagram g.new rect       { fill: color-mix(in oklab, var(--added) 12%, #fff) !important; stroke: var(--added) !important; }
+.diagram .highlighted > rect, .diagram g.highlighted rect {
+  stroke: #6b3fd4 !important;
+  stroke-width: 2.5px !important;
+  fill: #f2ecff !important;
+}
+
+/* --- Motion --------------------------------------------------------------- */
+/* Everything that moves is a GSAP tween guarded by gsap.matchMedia, so there
+   is nothing here but the belt-and-braces CSS kill switch. */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* --- Utilities ------------------------------------------------------------ */
+
+.dim   { color: var(--chalk-dim); }
+.faint { color: var(--chalk-faint); }
+.small { font-size: var(--t-small); }
+.micro { font-size: var(--t-micro); }
+.rule  { border: none; border-top: 1px solid var(--ink-600); margin: 0; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
