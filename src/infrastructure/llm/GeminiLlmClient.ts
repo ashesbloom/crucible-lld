@@ -66,7 +66,26 @@ export class GeminiLlmClient implements LlmClient {
   constructor(apiKey: string | undefined = process.env.GEMINI_API_KEY) {
     const key = apiKey?.trim();
     this.available = Boolean(key);
-    this.#client = key ? new GoogleGenAI({ apiKey: key }) : null;
+    this.#client = key
+      ? new GoogleGenAI({
+          apiKey: key,
+          // The SDK can retry 408, 429 and 5xx with exponential backoff, but
+          // only if this object exists: the request path returns early on
+          // `!retryOptions` before it looks at the status. Omitting it means a
+          // 503 saying "high demand, try again later" is not tried again, which
+          // is the first thing this model actually did. The Anthropic SDK
+          // retries twice on its own, so without this the two adapters behave
+          // differently for the layers that are supposed to be unable to tell
+          // them apart.
+          //
+          // The defaults are 5 attempts backing off to 60 seconds, which is far
+          // past the request the evaluation is running inside. Three attempts
+          // spend at most about three and a half seconds sleeping and still
+          // cover a brief spike. Anything longer is the queue's problem, and
+          // the pipeline already degrades instead of failing whole.
+          httpOptions: { retryOptions: { attempts: 3, initialDelay: 0.5, maxDelay: 4 } },
+        })
+      : null;
   }
 
   async requestStructured(request: StructuredRequest): Promise<unknown> {
