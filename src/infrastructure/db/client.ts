@@ -70,8 +70,25 @@ declare global {
 }
 
 function connect(): { client: Client; migrated: Promise<void> } {
-  const url = process.env.DATABASE_URL ?? "file:crucible.db";
-  const authToken = process.env.DATABASE_AUTH_TOKEN;
+  // Trimmed because these are usually pasted into a hosting dashboard, and a
+  // trailing newline turns a correct token into an authentication failure.
+  const url = process.env.DATABASE_URL?.trim() || "file:crucible.db";
+  const authToken = process.env.DATABASE_AUTH_TOKEN?.trim() || undefined;
+
+  // A remote database with no token reaches the server and comes back 401,
+  // which reads as "the token is wrong" when the actual state is "there is no
+  // token". Saying so here costs one branch and saves the guessing.
+  //
+  // Listed by scheme rather than as "not a file", because the tests connect to
+  // :memory:, which is local and needs no token despite having no file scheme.
+  if (/^(libsql|https?|wss?):/.test(url) && !authToken) {
+    throw new Error(
+      `DATABASE_URL points at ${url} but DATABASE_AUTH_TOKEN is empty. ` +
+        "A hosted database needs both. Create the token with " +
+        "`turso db tokens create <database-name>`; the account token from " +
+        "`turso auth token` is a different thing and is rejected with a 401.",
+    );
+  }
 
   const client = createClient(authToken ? { url, authToken } : { url });
 
