@@ -110,4 +110,4 @@ Honest list, in the order I would fix them.
 
 ## Deploying
 
-The repositories talk to libSQL, which serves a local file and hosted SQLite through one client. Point `DATABASE_URL` at a `libsql://` URL and set `DATABASE_AUTH_TOKEN`, and the same code runs on a platform with a read-only filesystem. Set `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` to enable the judged criteria; `GEMINI_MODEL` overrides the default model name if it is ever retired.
+The repositories talk to libSQL, which serves a local file and hosted SQLite through one client. Point `DATABASE_URL` at a `libsql://` URL and set `DATABASE_AUTH_TOKEN`, and the same code runs on a platform with a read-only filesystem. Set `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` to enable the judged criteria. With both set, `LLM_PROVIDER` picks between them, because a key being present is not the same as a key that works and nothing in the process can see a billing state. `GEMINI_MODEL` overrides the default model name if it is ever retired.

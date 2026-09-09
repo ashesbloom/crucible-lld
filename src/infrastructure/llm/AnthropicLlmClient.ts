@@ -71,15 +71,44 @@ export class UnavailableLlmClient implements LlmClient {
 }
 
 /**
- * First provider with a key wins, and none is a normal state rather than an
- * error: the heuristic evaluator covers the judged criteria and the whole loop
- * still runs end to end.
+ * Picks the provider. No key at all is a normal state rather than an error:
+ * the heuristic evaluator covers the judged criteria and the loop still runs
+ * end to end.
  *
- * Anthropic is tried first only because it is the one the rubric prompts were
- * written against. Nothing downstream can tell the difference, which is the
- * property the `LlmClient` port exists to hold.
+ * `LLM_PROVIDER` exists because the first version of this ranked providers by
+ * whether a key was present, and a key being present is not the same as a key
+ * working. A leftover Anthropic key with an exhausted credit balance won the
+ * ranking and answered every request with a 400, while a working Gemini key
+ * sat unused behind it. `available` cannot see a billing state, so the choice
+ * belongs to whoever configured the deployment rather than to a guess made
+ * here.
+ *
+ * Unset keeps the old behaviour, which is right for the common case of exactly
+ * one key. Set it when more than one is present and you mean a specific one.
  */
 export function createLlmClient(): LlmClient {
-  const candidates: LlmClient[] = [new AnthropicLlmClient(), new GeminiLlmClient()];
-  return candidates.find((client) => client.available) ?? new UnavailableLlmClient();
+  const clients: Record<string, () => LlmClient> = {
+    anthropic: () => new AnthropicLlmClient(),
+    gemini: () => new GeminiLlmClient(),
+  };
+
+  const requested = process.env.LLM_PROVIDER?.trim().toLowerCase();
+  if (requested) {
+    const build = clients[requested];
+    if (!build) {
+      throw new Error(
+        `LLM_PROVIDER is "${requested}". It must be one of: ${Object.keys(clients).join(", ")}.`,
+      );
+    }
+    // Deliberately not falling back to the other provider. Asking for one and
+    // silently getting another is worse than being told the key is missing.
+    const chosen = build();
+    return chosen.available ? chosen : new UnavailableLlmClient();
+  }
+
+  return (
+    Object.values(clients)
+      .map((build) => build())
+      .find((client) => client.available) ?? new UnavailableLlmClient()
+  );
 }
