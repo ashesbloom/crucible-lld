@@ -116,3 +116,23 @@ I am listing these because they are the honest answer to how much of this was AI
 - **A canned offline report.** The suggested no-API-key fallback returned fixed text. That would make the demo a lie: type a deliberately terrible design and be told it was fine. `HeuristicRubricEvaluator` derives levels from measurable properties of the actual submission instead, and is labelled `HEURISTIC` everywhere it appears.
 - **A generic loading spinner.** Replaced with the real pipeline stages, written back as each evaluator settles. It is more honest and it demonstrates the architecture without a paragraph of explanation.
 - **Colours picked by eye.** The first status palette looked fine and failed a contrast validator on the dark-mode lightness band, sitting at ΔE 10.7 under deuteranopia. Separating amber from red by hue rather than darkening everything got the worst adjacent pair to 12.5 under protanopia and 17.1 under normal vision, with all six checks passing. Two of the four still do not clear 4.5:1 as small text, so status colours are never the only carrier of state: every level and impact is written out next to its mark.
+
+---
+
+## 8. What broke after I shipped it
+
+Everything above happened while I was building. These happened after, once the code was finished and had to run somewhere that was not my laptop. I have grouped them by where they hit, because that is how they turned up.
+
+**The frontend looked like a machine made it.** Dark background, gradients, a glow on everything, corners rounded to the same radius as every other generated site. Fixing it was cheaper than I expected. Almost every component reads its colour, type and spacing through custom properties in `src/app/globals.css`, so I rewrote the values and left the names alone, and the whole site went plain from one file. That is the same idea as the rest of the codebase: put the thing likely to change behind a name, and changing it stops being a rewrite. A handful of components still needed editing by hand, mostly ones carrying a decorative SVG or an animation that no longer fit.
+
+**The deploy built and then failed.** Vercel compiled all 19 routes and then stopped with `No Output Directory named "public" found`. The build was never the problem. The project's framework preset was "Other", so Vercel went looking for a folder of static files and never looked at the Next.js output sitting right there. I set the preset in `vercel.json` rather than the dashboard, so it travels with the repository instead of living in one project's settings.
+
+**The database refused everything, twice.** The first error was a DNS failure on a hostname that turned out to be my Turso auth token, which I had pasted into `DATABASE_URL`. Once the URL was right, every request came back 401. That cost another round, because from the outside a missing token and a wrong token look identical. `src/infrastructure/db/client.ts` now checks before connecting and names the variable that is empty, instead of letting a bare 401 travel up to a blank error page.
+
+**The model vendor ran out of credit.** My Anthropic key stopped working partway through. The README claims a second provider would cost one new file and one line in the composition root, so this was that claim being run rather than asserted. It cost exactly that. `src/infrastructure/llm/GeminiLlmClient.ts` sits behind the same `LlmClient` port, and no evaluator, rubric, pipeline stage or component changed.
+
+Two things did not carry across. Anthropic guarantees the response shape by forcing a tool call, and Gemini has no equivalent, so the adapter constrains the response body with a JSON schema instead. The field order from section 1 is also load-bearing, since the rubric asks for the level before the prose on purpose. Anthropic follows the order of the schema it is handed and Gemini wants it stated separately, so the adapter derives it. A deliberate decision should not quietly stop applying because the vendor changed.
+
+Then I added a bug of my own. The code chose a provider by asking which key was present, which is a different question from which key works. The dead Anthropic key won and answered every review with a 400 while a working Gemini key sat behind it in the list. Nothing in the process can see a billing balance, so there was no smarter test to write, and `LLM_PROVIDER` hands the choice to whoever configures the deployment.
+
+As I write this, the deployed demo still scores with the heuristic evaluator, because I have not finished swapping the key over. That is the fallback from section 7 working as intended, and it is why the demo runs at all without a key. It does mean the four judged criteria read "not assessed" until I finish the switch.

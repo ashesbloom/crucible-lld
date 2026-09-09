@@ -5,7 +5,7 @@ export default function AiUsagePage() {
     <DocPage
       file="AI_USAGE.md"
       eyebrow="AI usage"
-      lede="Seven decisions where the first answer was wrong in a way that would have shipped quietly, and what I did instead."
+      lede="Seven decisions where the first answer was wrong in a way that would have shipped quietly, and one section on what broke after it went live."
     />
   );
 }

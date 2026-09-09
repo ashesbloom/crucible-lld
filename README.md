@@ -28,7 +28,7 @@ cp .env.example .env.local   # then set ANTHROPIC_API_KEY or GEMINI_API_KEY
 Two adapters, one `LlmClient` port. Adding the second provider was a new file and one line in the composition root, and no evaluator, rubric, pipeline stage or component changed. That is the extensibility claim being checked rather than described.
 
 ```bash
-npm test        # 109 tests, no network, no API key needed
+npm test        # 115 tests, no network, no API key needed
 npm run build   # production build
 npm run typecheck
 ```
@@ -80,7 +80,7 @@ If this grew, the first thing to split out is the evaluation worker — it is th
 
 ## Tests
 
-104 tests, all offline. The interesting ones assert that something is refused:
+115 tests, all offline. The interesting ones assert that something is refused:
 
 ```
 Evaluation           illegal transitions throw; retries stop at the cap
