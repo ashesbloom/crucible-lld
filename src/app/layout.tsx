@@ -53,12 +53,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main>
           <Reveal>{children}</Reveal>
         </main>
-
-        <footer style={{ borderTop: "1px solid var(--ink-600)", marginTop: "4rem", padding: "1.2rem 0" }}>
-          <div className="shell micro faint">
-            Two-day prototype for the CipherSchools LLD assignment. No accounts.
-          </div>
-        </footer>
       </body>
     </html>
   );
